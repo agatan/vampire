@@ -125,4 +125,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-
+livedoor-news-corpus
+*.ipynb
