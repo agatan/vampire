@@ -9,6 +9,7 @@ jupyterlab = "*"
 [packages]
 mecab-python3 = "*"
 torch = "*"
+scikit-learn = "*"
 
 [requires]
 python_version = "3.7"
