@@ -8,6 +8,7 @@ jupyterlab = "*"
 
 [packages]
 mecab-python3 = "*"
+torch = "*"
 
 [requires]
 python_version = "3.7"
