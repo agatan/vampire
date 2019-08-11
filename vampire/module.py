@@ -34,7 +34,7 @@ class LogVarianceProjection(nn.Linear):
 class Decoder(nn.Module):
     def __init__(self, in_features: int, vocab_size: int) -> None:
         super().__init__()
-        self.linear = nn.Linear(in_features, vocab_size)
+        self.linear = nn.Linear(in_features, vocab_size, bias=False)
 
     def forward(self, x):
         return self.linear(x)
