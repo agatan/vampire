@@ -34,10 +34,25 @@ class LogVarianceProjection(nn.Linear):
 class Decoder(nn.Module):
     def __init__(self, in_features: int, vocab_size: int) -> None:
         super().__init__()
+        self.vocab_size = vocab_size
         self.linear = nn.Linear(in_features, vocab_size, bias=False)
 
     def forward(self, x):
         return self.linear(x)
+
+    def extract_topics(self, top_k: int = 20) -> List[Tuple[str, List[int]]]:
+        """extract_topics returns a list of (topic name, word indices)
+        """
+        words = list(range(self.vocab_size))
+        topics: List[Tuple[str, List[int]]] = []
+        for i, topic in enumerate(self.linear.weight.detach()):  # type: ignore
+            word_strengths = list(zip(words, topic.tolist()))
+            sorted_by_strength = sorted(
+                word_strengths, key=lambda x: x[1], reverse=True
+            )
+            top_k_indices = [x[0] for x in sorted_by_strength][:top_k]
+            topics.append((str(i), top_k_indices))
+        return topics
 
 
 class VAE(nn.Module):
