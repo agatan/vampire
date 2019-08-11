@@ -42,27 +42,30 @@ class Decoder(nn.Module):
 
 class VAE(nn.Module):
     def __init__(
-        self, vocab_size: int, out_features: int, encoder_num_layers: int
+            self, vocab_size: int, out_features: int, encoder_num_layers: int, z_dropout: float = 0.4,
     ) -> None:
         super().__init__()
         self.encoder = Encoder(vocab_size, out_features, encoder_num_layers)
         self.mean_projection = MeanProjection(out_features, out_features)
         self.log_variance_projection = LogVarianceProjection(out_features, out_features)
         self.decoder = Decoder(out_features, vocab_size)
+        self.z_dropout = nn.Dropout(z_dropout)
 
     def encode(self, x):
-        x = self.encoder(x)
+        x, _ = self.encoder(x)
         return self.mean_projection(x), self.log_variance_projection(x)
 
     def reparameterize(self, mu, logvar):
-        std = torch.exp(0.5 * logvar)
-        eps = torch.randn_like(std)
-        return mu + eps * std
-
-    def decode(self, z):
-        return F.softmax(self.decoder(z))
+        if self.training:
+            std = torch.exp(0.5 * logvar)
+            eps = torch.randn_like(std)
+            z = mu + eps * std
+        else:
+            z = mu
+        theta = self.z_dropout(z)
+        return torch.softmax(theta, dim=-1)
 
     def forward(self, x):
         mu, logvar = self.encode(x)
         z = self.reparameterize(mu, logvar)
-        return self.decode(z), mu, logvar
+        return self.decoder(z), mu, logvar
