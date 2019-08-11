@@ -10,6 +10,7 @@ jupyterlab = "*"
 mecab-python3 = "*"
 torch = "*"
 scikit-learn = "*"
+pytorch-lightning = "*"
 
 [requires]
 python_version = "3.7"
