@@ -42,7 +42,11 @@ class Decoder(nn.Module):
 
 class VAE(nn.Module):
     def __init__(
-            self, vocab_size: int, out_features: int, encoder_num_layers: int, z_dropout: float = 0.4,
+        self,
+        vocab_size: int,
+        out_features: int,
+        encoder_num_layers: int,
+        z_dropout: float = 0.4,
     ) -> None:
         super().__init__()
         self.encoder = Encoder(vocab_size, out_features, encoder_num_layers)

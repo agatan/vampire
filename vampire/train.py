@@ -65,11 +65,7 @@ class VAMPIRE(plt.LightningModule):
         recon_loss, kld_loss, loss = self.compute_loss(x, recon_x, mu, logvar)
         return {
             "loss": loss,
-            "prog": {
-                "tng_loss": loss,
-                "recon_loss": recon_loss,
-                "kld_loss": kld_loss,
-            },
+            "prog": {"tng_loss": loss, "recon_loss": recon_loss, "kld_loss": kld_loss},
         }
 
     def validation_step(self, data_batch, _batch_nb):
