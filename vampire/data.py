@@ -2,8 +2,11 @@ from typing import Tuple, Optional, Union, List
 from pathlib import Path
 import abc
 
+import torch
 import torch.utils.data as data
 from sklearn.preprocessing import LabelEncoder
+
+from .preprocessing import Tokenizer, Vocab
 
 
 class Dataset(abc.ABC, data.Dataset):
@@ -41,3 +44,22 @@ class LivedoorNewsDataset(Dataset):
     def _trim_header(self, content: str) -> str:
         lines = content.split("\n", 3)
         return lines[-1]
+
+
+class BoWDataset(data.Dataset):
+    def __init__(self, tokenizer: Tokenizer, vocab: Vocab, dataset: Dataset) -> None:
+        super().__init__()
+        self.tokenizer = tokenizer
+        self.vocab = vocab
+        self.dataset = dataset
+
+    def __len__(self) -> int:
+        return len(self.dataset)
+
+    def __getitem__(self, index: int) -> Tuple[torch.Tensor, Optional[torch.Tensor]]:
+        s, label = self.dataset[index]
+        bow = self.vocab.encode_bow(self.tokenizer.tokenize(s))
+        if label is None:
+            return torch.tensor(bow), None
+        else:
+            return torch.tensor(bow), torch.tensor(label)
