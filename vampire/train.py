@@ -87,10 +87,10 @@ class VAMPIRE(plt.LightningModule):
         for output in outputs:
             for k, v in output.items():
                 if k not in values:
-                    values[k] = v.mean()
+                    values[k] = v
                 else:
-                    values[k] += v.mean()
-        return {k: v.mean().item() for k, v in values.items()}
+                    values[k] += v
+        return {k: v.item() / len(outputs) for k, v in values.items()}
 
     def configure_optimizers(self):
         return [torch.optim.Adam(self.parameters())]
