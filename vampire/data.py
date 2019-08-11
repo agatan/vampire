@@ -60,8 +60,7 @@ class BoWDataset(data.Dataset):
     def __getitem__(self, index: int) -> Tuple[torch.Tensor, Optional[torch.Tensor]]:
         s, label = self.dataset[index]
         bow = self.vocab.encode_bow(self.tokenizer.tokenize(s))
-        bow_tensor = torch.tensor(bow)
-        bow_tensor = bow_tensor.float() / float(bow_tensor.sum().item())
+        bow_tensor = torch.tensor(bow).float()
         if label is None:
             return bow_tensor, None
         else:
