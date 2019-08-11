@@ -68,7 +68,7 @@ class Vocab:
             return self._id2token[index]
         return None
 
-    def encode(self, tokens: List[str]) -> torch.LongTensor:
+    def encode_bow(self, tokens: List[str]) -> torch.Tensor:
         tensor = torch.zeros(self.vocab_size, dtype=torch.long)
         for token in tokens:
             index = self.token2index(token)
