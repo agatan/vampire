@@ -14,7 +14,7 @@ class Tokenizer(abc.ABC):
 class MeCabTokenizer(Tokenizer):
     def __init__(
         self,
-        part_of_speech_filter: Set[str] = set(["名詞", "動詞"]),
+        part_of_speech_filter: Optional[Set[str]] = set(["名詞", "動詞"]),
         use_original: bool = True,
     ) -> None:
         self.tagger = MeCab.Tagger()
@@ -27,7 +27,9 @@ class MeCabTokenizer(Tokenizer):
         while node:
             features = node.feature.split(",")
             pos = features[0]
-            if pos not in self.part_of_speech_filter or pos == "BOS/EOS":
+            if (
+                self.part_of_speech_filter and pos not in self.part_of_speech_filter
+            ) or pos == "BOS/EOS":
                 node = node.next
                 continue
             token = node.surface
