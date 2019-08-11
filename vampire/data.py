@@ -5,6 +5,7 @@ import abc
 import torch
 import torch.utils.data as data
 from sklearn.preprocessing import LabelEncoder
+import sklearn.model_selection as model_selection
 
 from .preprocessing import Tokenizer, Vocab
 
@@ -65,3 +66,10 @@ class BoWDataset(data.Dataset):
             return bow_tensor, None
         else:
             return bow_tensor, torch.tensor(label)
+
+
+def train_test_split(x, test_size=0.1, shuffle=True, random_state=42):
+    ys = [y for _, y in x]
+    return model_selection.train_test_split(
+        x, test_size=test_size, shuffle=shuffle, stratify=ys, random_state=random_state
+    )
