@@ -48,8 +48,8 @@ class VAMPIRE(plt.LightningModule):
         parser.add_argument("--encoder_num_layers", default=2, type=int)
         return parser
 
-    def on_epoch_end(self):
-        self._kld_weight = min(1, self.current_epoch / self._kld_linear_scaling)
+    def on_batch_end(self):
+        self._kld_weight = min(1, self.global_step / self._kld_linear_scaling)
 
     def reconstruct_loss(self, x, recon_x):
         recon_x = self.bow_bn(recon_x + self.background_log_frequency)
