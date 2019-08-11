@@ -34,7 +34,7 @@ class VAMPIRE(plt.LightningModule):
         self.background_log_frequency = nn.Parameter(
             self.vocab.background_log_frequency(), requires_grad=False
         )
-        self.bow_bn = torch.nn.BatchNorm1d(self.vocab.vocab_size)
+        self.bow_bn = torch.nn.BatchNorm1d(self.vocab.vocab_size, affine=False)
 
     @staticmethod
     def add_model_specific_args(parent: HyperOptArgumentParser, root_dir):
