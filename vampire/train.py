@@ -30,6 +30,14 @@ class VAMPIRE(plt.LightningModule):
         self._kld_linear_scaling = 1000.0
         self._kld_weight = 1.0 / self._kld_linear_scaling
 
+        self.bow_bn = torch.nn.BatchNorm1d(
+            self.vocab.vocab_size, eps=0.001, momentum=0.001, affine=True
+        )
+        self.bow_bn.weight.data.copy_(
+            torch.ones(self.vocab.vocab_size, dtype=torch.float)
+        )
+        self.bow_bn.weight.requires_grad = False
+
     @staticmethod
     def add_model_specific_args(parent: HyperOptArgumentParser, root_dir):
         parser = HyperOptArgumentParser(strategy=parent.strategy, parents=[parent])
@@ -46,6 +54,7 @@ class VAMPIRE(plt.LightningModule):
         self._kld_weight = min(1, self.current_epoch / self._kld_linear_scaling)
 
     def reconstruct_loss(self, x, recon_x):
+        recon_x = self.bow_bn(recon_x)
         log_recon_x = F.log_softmax(recon_x, dim=-1)
         return -torch.sum(x * log_recon_x, dim=-1)
 
