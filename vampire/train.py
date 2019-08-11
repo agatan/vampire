@@ -2,6 +2,7 @@ import os
 from typing import Dict
 
 import torch
+import torch.nn as nn
 import torch.optim
 import torch.utils.data
 import torch.nn.functional as F
@@ -30,6 +31,9 @@ class VAMPIRE(plt.LightningModule):
         self._kld_linear_scaling = 1000.0
         self._kld_weight = 1.0 / self._kld_linear_scaling
 
+        self.background_log_frequency = nn.Parameter(
+            self.vocab.background_log_frequency(), requires_grad=False
+        )
         self.bow_bn = torch.nn.BatchNorm1d(
             self.vocab.vocab_size, eps=0.001, momentum=0.001, affine=True
         )
@@ -54,7 +58,7 @@ class VAMPIRE(plt.LightningModule):
         self._kld_weight = min(1, self.current_epoch / self._kld_linear_scaling)
 
     def reconstruct_loss(self, x, recon_x):
-        recon_x = self.bow_bn(recon_x)
+        recon_x = self.bow_bn(recon_x + self.background_log_frequency)
         log_recon_x = F.log_softmax(recon_x, dim=-1)
         return -torch.sum(x * log_recon_x, dim=-1)
 

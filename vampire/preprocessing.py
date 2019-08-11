@@ -54,6 +54,7 @@ class Vocab:
         for toks in tokens:
             for tok in toks:
                 counter[tok] += 1
+        self._counter = counter
         top_n = counter.most_common(max_size)
         self._id2token = specials + [token for token, n in top_n if n >= min_freq]
         self._token2id = {token: i for i, token in enumerate(self._id2token)}
@@ -77,3 +78,13 @@ class Vocab:
             if index is not None:
                 tensor[index] += 1
         return tensor
+
+    def background_log_frequency(self) -> torch.Tensor:
+        term_frequency = torch.zeros(self.vocab_size, dtype=torch.float)
+        for index in range(self.vocab_size):
+            token = self.index2token(index)
+            if token is None:
+                term_frequency[index] = 1e-12
+            else:
+                term_frequency[index] = self._counter.get(token, 1e-12)
+        return torch.log(term_frequency)
