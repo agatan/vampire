@@ -27,7 +27,8 @@ class VAMPIRE(plt.LightningModule):
         self.vae = VAE(
             self.vocab.vocab_size, hparams.latent_dim, hparams.encoder_num_layers
         )
-        self._kld_weight = 1.0
+        self._kld_linear_scaling = 1000.0
+        self._kld_weight = 1.0 / self._kld_linear_scaling
 
     @staticmethod
     def add_model_specific_args(parent: HyperOptArgumentParser, root_dir):
@@ -40,6 +41,9 @@ class VAMPIRE(plt.LightningModule):
         parser.add_argument("--latent_dim", default=80, type=int)
         parser.add_argument("--encoder_num_layers", default=2, type=int)
         return parser
+
+    def on_epoch_end(self):
+        self._kld_weight = min(1, self.current_epoch / self._kld_linear_scaling)
 
     def reconstruct_loss(self, x, recon_x):
         log_recon_x = F.log_softmax(recon_x, dim=-1)
