@@ -59,7 +59,8 @@ class VAMPIRE(plt.LightningModule):
 
     def reconstruct_loss(self, x, recon_x):
         recon_x = self.bow_bn(recon_x + self.background_log_frequency)
-        log_recon_x = F.log_softmax(recon_x, dim=-1)
+        recon_x = recon_x + self.background_log_frequency
+        log_recon_x = F.log_softmax(recon_x + 1e-10, dim=-1)
         return -torch.sum(x * log_recon_x, dim=-1)
 
     def kl_divergence_loss(self, mu, logvar):
