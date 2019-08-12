@@ -28,13 +28,19 @@ class VAMPIRE(plt.LightningModule):
         self.vae = VAE(
             self.vocab.vocab_size, hparams.latent_dim, hparams.encoder_num_layers
         )
-        self._kld_linear_scaling = 1000.0
+        self._kld_linear_scaling = 100.0
         self._kld_weight = 1.0 / self._kld_linear_scaling
 
         self.background_log_frequency = nn.Parameter(
             self.vocab.background_log_frequency(), requires_grad=False
         )
-        self.bow_bn = torch.nn.BatchNorm1d(self.vocab.vocab_size, affine=False)
+        self.bow_bn = torch.nn.BatchNorm1d(
+            self.vocab.vocab_size, eps=0.001, momentum=0.001, affine=True
+        )
+        self.bow_bn.weight.data.copy_(
+            torch.ones(self.vocab.vocab_size, dtype=torch.float)
+        )
+        self.bow_bn.weight.requires_grad = False
 
     @staticmethod
     def add_model_specific_args(parent: HyperOptArgumentParser, root_dir):
@@ -48,8 +54,8 @@ class VAMPIRE(plt.LightningModule):
         parser.add_argument("--encoder_num_layers", default=2, type=int)
         return parser
 
-    def on_batch_end(self):
-        self._kld_weight = min(1, self.global_step / self._kld_linear_scaling)
+    def on_epoch_end(self):
+        self._kld_weight = min(1, self.current_epoch / self._kld_linear_scaling)
 
     def reconstruct_loss(self, x, recon_x):
         recon_x = self.bow_bn(recon_x + self.background_log_frequency)
