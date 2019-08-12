@@ -64,7 +64,7 @@ class VAMPIRE(plt.LightningModule):
         return -torch.sum(x * log_recon_x, dim=-1)
 
     def kl_divergence_loss(self, mu, logvar):
-        kld = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+        kld = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(), dim=-1)
         return kld
 
     def compute_loss(self, x, recon_x, mu, logvar):
