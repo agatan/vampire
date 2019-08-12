@@ -111,6 +111,7 @@ class VAMPIRE(plt.LightningModule):
             BoWDataset(self.tokenizer, self.vocab, self.train_dataset),
             batch_size=64,
             shuffle=True,
+            num_workers=4,
         )
 
     @plt.data_loader
